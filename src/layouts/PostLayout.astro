@@ -15,29 +15,69 @@ import { Image } from "astro:assets";
 <BaseLayout title={title} description={description} image={heroImage}, ogType="article">
   <main class="md:flex md:justify-center">
     <article class="prose prose-lg max-w-[750px] prose-img:mx-auto">
-      {heroImage && <Image width={750} height={422} format="webp" src={heroImage} alt={title} class="w-full mb-6" />}
-      <h1 class="title my-2 text-4xl font-bold">{title}</h1>
-      {pubDate && <time>{displayDate}</time>}
-      <br />
-      {badge && <div class="badge badge-secondary my-1">{badge}</div>}
-      {
-        tags &&
-          tags.map((tag) => (
-            <a href={`/blog/tag/${tag}`} class="badge badge-outline ml-2 no-underline">
-              {tag}
-            </a>
-          ))
-      }
+      {heroImage && <Image width={750} height={422} format="webp" src={heroImage} alt={title} class="w-full mb-6 rounded-2xl" />}
+      <h1 class="title mt-2 mb-3 text-4xl font-bold leading-tight">{title}</h1>
+
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-base-content/70 not-prose">
+        {pubDate && (
+          <span class="inline-flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9 1v2h6V1h2v2h4a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4V1h2zm11 9H4v10h16V10zm-9 2v6H9v-6h2zm4 0v6h-2v-6h2zM7 5H4v3h16V5h-3v1h-2V5H9v1H7V5z"/></svg>
+            <time datetime={pubDate.toISOString()}>{displayDate}</time>
+          </span>
+        )}
+        <span
+          id="busuanzi_container_page_pv"
+          class="inline-flex items-center gap-1.5"
+          style="display:none"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c5.392 0 9.878 3.88 10.819 9-.94 5.12-5.427 9-10.819 9-5.392 0-9.878-3.88-10.819-9C2.121 6.88 6.608 3 12 3zm0 16a9.005 9.005 0 0 0 8.777-7 9.005 9.005 0 0 0-17.554 0A9.005 9.005 0 0 0 12 19zm0-2.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+          <span id="busuanzi_value_page_pv">-</span>
+          <span>次阅读</span>
+        </span>
+        {badge && <span class="badge badge-primary badge-sm">{badge}</span>}
+        {
+          tags &&
+            tags.map((tag) => (
+              <a href={`/blog/tag/${tag}`} class="badge badge-outline badge-sm no-underline hover:badge-primary">
+                {tag}
+              </a>
+            ))
+        }
+      </div>
+
       {
         updatedDate && (
-          <div>
-            {" "}
-            Last updated on <time>{updatedDate}</time>{" "}
+          <div class="mt-2 text-sm text-base-content/60 not-prose">
+            最近更新于 <time>{updatedDate}</time>
           </div>
         )
       }
-      <div class="divider my-2"></div>
+
+      <div class="divider my-6"></div>
       <slot />
     </article>
   </main>
+
+  <script is:inline>
+    // Reveal PV counter once busuanzi has populated it (or gracefully after timeout)
+    (function () {
+      const container = document.getElementById("busuanzi_container_page_pv");
+      const value = document.getElementById("busuanzi_value_page_pv");
+      if (!container || !value) return;
+      const reveal = () => { container.style.display = ""; };
+      // Poll for a few seconds; busuanzi replaces content async
+      let tries = 0;
+      const timer = setInterval(() => {
+        tries++;
+        if (value.textContent && value.textContent !== "-") {
+          reveal();
+          clearInterval(timer);
+        } else if (tries > 15) {
+          // Fallback: even if fetch failed, show placeholder anyway to avoid hidden UI
+          reveal();
+          clearInterval(timer);
+        }
+      }, 400);
+    })();
+  </script>
 </BaseLayout>

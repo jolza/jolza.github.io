@@ -10,4 +10,26 @@ const today = new Date();
     Built with <a href="https://astro.build" target="_blank" class="font-medium hover:text-primary transition-colors">Astro</a>
     &nbsp;·&nbsp; Hosted on <a href="https://pages.github.com/" target="_blank" class="font-medium hover:text-primary transition-colors">GitHub Pages</a>
   </div>
+  <div class="text-xs opacity-75">
+    <span id="busuanzi_container_site_pv" style="display:none">总访问 <span id="busuanzi_value_site_pv">-</span> 次</span>
+    <span id="busuanzi_container_site_uv" style="display:none">&nbsp;·&nbsp; <span id="busuanzi_value_site_uv">-</span> 人到访</span>
+  </div>
 </footer>
+<script is:inline>
+  (function () {
+    const targets = [
+      ["busuanzi_container_site_pv", "busuanzi_value_site_pv"],
+      ["busuanzi_container_site_uv", "busuanzi_value_site_uv"],
+    ];
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries++;
+      targets.forEach(([cid, vid]) => {
+        const c = document.getElementById(cid);
+        const v = document.getElementById(vid);
+        if (c && v && v.textContent && v.textContent !== "-") c.style.display = "";
+      });
+      if (tries > 15) clearInterval(timer);
+    }, 400);
+  })();
+</script>
