@@ -1,16 +1,32 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import HorizontalCard from "../../components/HorizontalCard.astro";
 import { getCollection } from "astro:content";
-import createSlug from "../../lib/createSlug"
+import createSlug from "../../lib/createSlug";
+import dayjs from "dayjs";
 
 export async function getStaticPaths({ paginate }) {
   const posts = await getCollection("blog");
   posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-  return paginate(posts, { pageSize: 10 });
+  return paginate(posts, { pageSize: 20 });
 }
 
 const { page } = Astro.props;
+
+// Group by year for the current page's posts
+const grouped: Record<string, typeof page.data> = {};
+for (const p of page.data) {
+  const y = dayjs(p.data.pubDate).format("YYYY");
+  (grouped[y] ||= []).push(p);
+}
+const years = Object.keys(grouped).sort((a, b) => Number(b) - Number(a));
+
+// Collect all series (across the site, not just this page)
+const allPosts = await getCollection("blog");
+const seriesMap: Record<string, number> = {};
+for (const p of allPosts) {
+  if (p.data.series) seriesMap[p.data.series] = (seriesMap[p.data.series] || 0) + 1;
+}
+const seriesList = Object.entries(seriesMap).sort((a, b) => b[1] - a[1]);
 ---
 
 <BaseLayout title="博客" sideBarActiveItemID="blog">
@@ -22,7 +38,25 @@ const { page } = Astro.props;
     </p>
   </section>
 
-  <div class="mt-8">
+  {seriesList.length > 0 && (
+    <section class="mt-8">
+      <div class="text-xs font-mono text-base-content/50 mb-2">// 合集</div>
+      <div class="flex flex-wrap gap-2">
+        {seriesList.map(([name, count]) => (
+          <a
+            href={`/blog/series/${createSlug(name, name)}/`}
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-base-200 hover:bg-primary/10 hover:text-primary border border-base-300 hover:border-primary/40 transition-colors text-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12zM6 8h12v2H6zm0 4h12v2H6zm0 4h8v2H6z"/></svg>
+            <span>{name}</span>
+            <span class="text-xs opacity-60">{count}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <div class="mt-10">
   {
     page.data.length === 0 ? (
       <div class="bg-base-200 border-l-4 border-primary w-full p-4 min-w-full rounded-r">
@@ -30,22 +64,57 @@ const { page } = Astro.props;
         <p class="text-base-content/70">正在酝酿中，稍后回来看看吧。</p>
       </div>
     ) : (
-      <ul>
-        {page.data.map((post) => (
-          <>
-            <HorizontalCard
-              title={post.data.title}
-              img={post.data.heroImage}
-              desc={post.data.description}
-              url={"/blog/" + createSlug(post.data.title, post.slug)}
-              target="_self"
-              badge={post.data.badge}
-              tags={post.data.tags}
-            />
-            <div class="divider my-0" />
-          </>
-        ))}
-      </ul>
+      years.map((year) => (
+        <section class="mb-10">
+          <div class="flex items-baseline gap-3 mb-4 sticky top-0 bg-base-100 py-2">
+            <h2 class="text-3xl font-black text-base-content/80">{year}</h2>
+            <span class="text-xs font-mono text-base-content/40">
+              {grouped[year].length} posts
+            </span>
+          </div>
+
+          <ul class="space-y-1">
+            {grouped[year].map((post) => (
+              <li>
+                <a
+                  href={"/blog/" + createSlug(post.data.title, post.slug) + "/"}
+                  class="group flex items-start gap-4 py-3 px-3 -mx-3 rounded-lg hover:bg-base-200/60 transition-colors"
+                >
+                  <time class="shrink-0 text-sm text-base-content/50 font-mono pt-0.5 w-20">
+                    {dayjs(post.data.pubDate).format("MM-DD")}
+                  </time>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center flex-wrap gap-2">
+                      <span class="font-semibold text-base group-hover:text-primary transition-colors">
+                        {post.data.title}
+                      </span>
+                      {post.data.badge && (
+                        <span class="badge badge-primary badge-xs">{post.data.badge}</span>
+                      )}
+                      {post.data.series && (
+                        <span class="inline-flex items-center gap-1 text-xs text-base-content/50">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12zM6 8h12v2H6zm0 4h12v2H6zm0 4h8v2H6z"/></svg>
+                          {post.data.series}{post.data.seriesOrder ? ` · ${post.data.seriesOrder}` : ""}
+                        </span>
+                      )}
+                    </div>
+                    <p class="text-sm text-base-content/60 mt-1 line-clamp-2">
+                      {post.data.description}
+                    </p>
+                    {post.data.tags && post.data.tags.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5 mt-2">
+                        {post.data.tags.map((tag) => (
+                          <span class="badge badge-outline badge-xs">{tag}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
     )
   }
   </div>
@@ -54,40 +123,22 @@ const { page } = Astro.props;
     {
       page.url.prev ? (
         <a href={page.url.prev} class="btn btn-ghost my-10 mx-5">
-          {" "}
-          <svg
-            class="h-6 w-6 fill-current md:h-8 md:w-8"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
+          <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
-          </svg>{" "}
+          </svg>
           最新文章
         </a>
-      ) : (
-        <div />
-      )
+      ) : (<div />)
     }
     {
       page.url.next ? (
         <a href={page.url.next} class="btn btn-ghost my-10 mx-5">
-          更早文章{" "}
-          <svg
-            class="h-6 w-6 fill-current md:h-8 md:w-8"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-          >
-            {" "}
+          更早文章
+          <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z" />
           </svg>
         </a>
-      ) : (
-        <div />
-      )
+      ) : (<div />)
     }
   </div>
 </BaseLayout>

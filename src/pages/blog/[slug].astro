@@ -19,6 +19,36 @@ interface Props {
 const { entry } = Astro.props;
 const post: BlogSchema = entry.data;
 const { Content } = await entry.render();
+
+// Compute previous/next within the same series
+let seriesNav: {
+  seriesName: string;
+  seriesSlug: string;
+  prev: { title: string; url: string } | null;
+  next: { title: string; url: string } | null;
+  currentIndex: number;
+  total: number;
+} | null = null;
+
+if (post.series) {
+  const all = await getCollection("blog");
+  const siblings = all
+    .filter((p) => p.data.series === post.series)
+    .sort((a, b) => (a.data.seriesOrder ?? 999) - (b.data.seriesOrder ?? 999));
+
+  const idx = siblings.findIndex((p) => p.slug === entry.slug);
+  const prev = idx > 0 ? siblings[idx - 1] : null;
+  const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+  seriesNav = {
+    seriesName: post.series,
+    seriesSlug: createSlug(post.series, post.series),
+    prev: prev ? { title: prev.data.title, url: "/blog/" + createSlug(prev.data.title, prev.slug) + "/" } : null,
+    next: next ? { title: next.data.title, url: "/blog/" + createSlug(next.data.title, next.slug) + "/" } : null,
+    currentIndex: idx + 1,
+    total: siblings.length,
+  };
+}
 ---
 
 <PostLayout
@@ -29,6 +59,7 @@ const { Content } = await entry.render();
   updatedDate={post.updatedDate}
   badge={post.badge}
   tags={post.tags}
+  seriesNav={seriesNav}
 >
   <Content />
 </PostLayout>

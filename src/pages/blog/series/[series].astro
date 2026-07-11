@@ -1,0 +1,77 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import createSlug from "../../../lib/createSlug";
+import dayjs from "dayjs";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  const seriesGroups: Record<string, typeof posts> = {};
+  for (const p of posts) {
+    if (!p.data.series) continue;
+    (seriesGroups[p.data.series] ||= []).push(p);
+  }
+  return Object.entries(seriesGroups).map(([name, list]) => ({
+    params: { series: createSlug(name, name) },
+    props: {
+      seriesName: name,
+      posts: list.sort((a, b) => (a.data.seriesOrder ?? 999) - (b.data.seriesOrder ?? 999)),
+    },
+  }));
+}
+
+interface Props {
+  seriesName: string;
+  posts: any[];
+}
+
+const { seriesName, posts } = Astro.props as Props;
+---
+
+<BaseLayout title={`${seriesName} · 合集`} sideBarActiveItemID="blog">
+  <section class="pt-6 pb-4">
+    <a href="/blog/" class="text-sm text-base-content/60 hover:text-primary transition-colors inline-flex items-center gap-1 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>
+      返回博客
+    </a>
+    <div class="badge badge-primary badge-outline mb-4">Series · 合集</div>
+    <h1 class="text-4xl md:text-5xl font-black tracking-tight">{seriesName}</h1>
+    <p class="text-base-content/70 mt-3">
+      本合集共 <span class="font-semibold">{posts.length}</span> 篇文章。
+    </p>
+  </section>
+
+  <div class="mt-10">
+    <ol class="relative border-l-2 border-base-300 ml-3 space-y-6">
+      {posts.map((post, idx) => (
+        <li class="ml-6">
+          <span class="absolute -left-[9px] flex items-center justify-center w-4 h-4 bg-primary rounded-full ring-4 ring-base-100 text-xs font-bold text-primary-content">
+            {post.data.seriesOrder ?? idx + 1}
+          </span>
+          <a
+            href={"/blog/" + createSlug(post.data.title, post.slug) + "/"}
+            class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all p-5"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <h3 class="text-xl font-bold group-hover:text-primary transition-colors">
+                {post.data.title}
+              </h3>
+              {post.data.badge && <span class="badge badge-primary badge-sm">{post.data.badge}</span>}
+              <span class="ml-auto text-xs text-base-content/50 font-mono">
+                {dayjs(post.data.pubDate).format("YYYY-MM-DD")}
+              </span>
+            </div>
+            <p class="text-base-content/70 leading-relaxed mb-3">{post.data.description}</p>
+            {post.data.tags && post.data.tags.length > 0 && (
+              <div class="flex flex-wrap gap-1.5">
+                {post.data.tags.map((tag: string) => (
+                  <span class="badge badge-outline badge-sm">{tag}</span>
+                ))}
+              </div>
+            )}
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+</BaseLayout>

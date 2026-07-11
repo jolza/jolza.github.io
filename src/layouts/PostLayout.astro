@@ -4,9 +4,20 @@ import BaseLayout from "./BaseLayout.astro";
 import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 
-export interface Props extends BlogSchema {}
+interface SeriesNav {
+  seriesName: string;
+  seriesSlug: string;
+  prev: { title: string; url: string } | null;
+  next: { title: string; url: string } | null;
+  currentIndex: number;
+  total: number;
+}
 
-const { title, description, pubDate, updatedDate, heroImage, badge, tags = [] } = Astro.props;
+export interface Props extends BlogSchema {
+  seriesNav?: SeriesNav | null;
+}
+
+const { title, description, pubDate, updatedDate, heroImage, badge, tags = [], seriesNav = null } = Astro.props;
 dayjs.extend(localizedFormat);
 const displayDate = dayjs(pubDate).format("ll")
 import { Image } from "astro:assets";
@@ -16,6 +27,18 @@ import { Image } from "astro:assets";
   <main class="md:flex md:justify-center">
     <article class="prose prose-lg max-w-[750px] prose-img:mx-auto">
       {heroImage && <Image width={750} height={422} format="webp" src={heroImage} alt={title} class="w-full mb-6 rounded-2xl" />}
+
+      {seriesNav && (
+        <a
+          href={`/blog/series/${seriesNav.seriesSlug}/`}
+          class="not-prose inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm no-underline"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zm-1 14H4V6h16v12zM6 8h12v2H6zm0 4h12v2H6zm0 4h8v2H6z"/></svg>
+          <span>合集：{seriesNav.seriesName}</span>
+          <span class="text-xs opacity-70">· 第 {seriesNav.currentIndex}/{seriesNav.total} 篇</span>
+        </a>
+      )}
+
       <h1 class="title mt-2 mb-3 text-4xl font-bold leading-tight">{title}</h1>
 
       <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-base-content/70 not-prose">
@@ -51,6 +74,47 @@ import { Image } from "astro:assets";
 
       <div class="divider my-6"></div>
       <slot />
+
+      {seriesNav && (
+        <nav class="not-prose mt-16 pt-6 border-t border-base-300">
+          <div class="text-xs font-mono text-base-content/50 mb-3">// 本合集其他文章</div>
+          <div class="grid md:grid-cols-2 gap-3">
+            {seriesNav.prev ? (
+              <a
+                href={seriesNav.prev.url}
+                class="group block p-4 rounded-xl border border-base-300 hover:border-primary/40 hover:bg-base-200/40 transition-colors"
+              >
+                <div class="text-xs text-base-content/50 mb-1 inline-flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>
+                  上一篇
+                </div>
+                <div class="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
+                  {seriesNav.prev.title}
+                </div>
+              </a>
+            ) : <div class="hidden md:block" />}
+            {seriesNav.next ? (
+              <a
+                href={seriesNav.next.url}
+                class="group block p-4 rounded-xl border border-base-300 hover:border-primary/40 hover:bg-base-200/40 transition-colors md:text-right"
+              >
+                <div class="text-xs text-base-content/50 mb-1 inline-flex items-center gap-1">
+                  下一篇
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/></svg>
+                </div>
+                <div class="font-medium text-sm group-hover:text-primary transition-colors line-clamp-2">
+                  {seriesNav.next.title}
+                </div>
+              </a>
+            ) : <div class="hidden md:block" />}
+          </div>
+          <div class="mt-4 text-center">
+            <a href={`/blog/series/${seriesNav.seriesSlug}/`} class="link link-primary text-sm">
+              查看合集全部 {seriesNav.total} 篇 →
+            </a>
+          </div>
+        </nav>
+      )}
     </article>
   </main>
 
@@ -58,14 +122,12 @@ import { Image } from "astro:assets";
     (function () {
       const NAMESPACE = "jolza-github-io";
 
-      // Short stable hash from path (Abacus limits keys to 3-64 chars).
-      // DJB2-like: fast, deterministic, base36 -> ~7 chars for 32-bit result.
       function hashKey(path) {
         let h = 5381;
         for (let i = 0; i < path.length; i++) {
           h = ((h << 5) + h + path.charCodeAt(i)) | 0;
         }
-        return "p_" + (h >>> 0).toString(36); // "p_" prefix keeps it >= 3 chars even for h=0
+        return "p_" + (h >>> 0).toString(36);
       }
 
       async function loadCount() {

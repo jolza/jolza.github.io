@@ -5,6 +5,8 @@ pubDate: "Jul 11 2026"
 heroImage: "/post_img.webp"
 tags: ["Spark", "Iceberg", "调优"]
 badge: "TUNING"
+series: "Spark 生产调优笔记"
+seriesOrder: 1
 ---
 
 上周处理了一个线上任务：**每天凌晨 2 点跑，写入 Iceberg，稳定运行 45 分钟**。业务方反馈下游报表延迟太久，要求压到 10 分钟以内。最后压到了 4 分钟。
