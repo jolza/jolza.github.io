@@ -1,51 +1,123 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import HorizontalCard from "../components/HorizontalCard.astro";
+
+const inProgress = [
+  {
+    emoji: "📊",
+    gradient: "from-primary/30 to-secondary/30",
+    title: "实时数仓平台",
+    year: "2024",
+    tags: ["Flink", "Kafka", "Iceberg"],
+    desc: "基于流批一体架构搭建的实时数据仓库，日处理事件 10 亿+ 条，端到端延迟 < 3s。",
+    badge: "NEW"
+  },
+  {
+    emoji: "🧪",
+    gradient: "from-secondary/30 to-accent/30",
+    title: "指标计算引擎",
+    year: "2024",
+    tags: ["Spark", "ClickHouse"],
+    desc: "支持万级指标定义与调度的自助分析平台，业务方零代码即可上线新指标。",
+  },
+];
+
+const completed = [
+  {
+    emoji: "🕸️",
+    gradient: "from-accent/30 to-primary/30",
+    title: "数据血缘系统",
+    year: "2023",
+    tags: ["Atlas", "Neo4j"],
+    desc: "端到端字段级血缘追踪，覆盖离线/实时全链路，帮助合规与影响分析场景。",
+    badge: "FOSS"
+  },
+  {
+    emoji: "🔍",
+    gradient: "from-secondary/30 to-primary/30",
+    title: "SQL 查询网关",
+    year: "2023",
+    tags: ["Presto", "Trino"],
+    desc: "统一查询入口，支持跨数据源联邦查询与权限治理。",
+  },
+  {
+    emoji: "📦",
+    gradient: "from-accent/30 to-secondary/30",
+    title: "调度平台迁移",
+    year: "2022",
+    tags: ["Airflow", "DolphinScheduler"],
+    desc: "从 Airflow 平滑迁移至 DolphinScheduler，任务规模 5000+，零业务中断。",
+  },
+];
+
+function Card(p) { return p; }
 ---
 
 <BaseLayout title="项目集" sideBarActiveItemID="projects">
-  <div>
-    <div class="text-3xl w-full font-bold mb-5">进行中</div>
-  </div>
+  <section class="pt-6 pb-4">
+    <div class="badge badge-primary badge-outline mb-4">Projects</div>
+    <h1 class="text-4xl md:text-5xl font-black tracking-tight">项目集</h1>
+    <p class="text-base-content/70 mt-3 max-w-2xl">
+      过去几年参与和主导的一些项目。带有 <span class="badge badge-primary badge-xs">NEW</span> 的是当前正在推进的。
+    </p>
+  </section>
 
-  <HorizontalCard
-    title="项目 1"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-    badge="NEW"
-  />
-  <div class="divider my-0"></div>
-  <HorizontalCard
-    title="项目 2"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-  />
+  <section class="mt-10">
+    <div class="flex items-baseline gap-3 mb-6">
+      <h2 class="text-2xl font-bold">进行中</h2>
+      <span class="text-base-content/50 font-mono text-sm">// In Progress</span>
+    </div>
 
-  <div>
-    <div class="text-3xl w-full font-bold mb-5 mt-10">已完成</div>
-  </div>
+    <div class="grid gap-5">
+      {inProgress.map((p) => (
+        <a href="#" class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
+          <div class="flex flex-col md:flex-row">
+            <div class={`bg-gradient-to-br ${p.gradient} md:w-40 flex items-center justify-center p-6 text-6xl`}>
+              {p.emoji}
+            </div>
+            <div class="flex-1 p-5">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="text-xl font-bold group-hover:text-primary transition-colors">{p.title}</h3>
+                {p.badge && <span class="badge badge-primary badge-sm">{p.badge}</span>}
+                <span class="ml-auto text-xs text-base-content/50 font-mono">{p.year}</span>
+              </div>
+              <p class="text-base-content/70 leading-relaxed mb-3">{p.desc}</p>
+              <div class="flex flex-wrap gap-1.5">
+                {p.tags.map((t) => (<span class="badge badge-outline badge-sm">{t}</span>))}
+              </div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
 
-  <HorizontalCard
-    title="项目 3"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-    badge="FOSS"
-  />
-  <div class="divider my-0"></div>
-  <HorizontalCard
-    title="项目 4"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-  />
-  <div class="divider my-0"></div>
-  <HorizontalCard
-    title="项目 5"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-  />
+  <section class="mt-16">
+    <div class="flex items-baseline gap-3 mb-6">
+      <h2 class="text-2xl font-bold">已完成</h2>
+      <span class="text-base-content/50 font-mono text-sm">// Archived</span>
+    </div>
+
+    <div class="grid gap-5">
+      {completed.map((p) => (
+        <a href="#" class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
+          <div class="flex flex-col md:flex-row">
+            <div class={`bg-gradient-to-br ${p.gradient} md:w-40 flex items-center justify-center p-6 text-6xl`}>
+              {p.emoji}
+            </div>
+            <div class="flex-1 p-5">
+              <div class="flex items-center gap-2 mb-2">
+                <h3 class="text-xl font-bold group-hover:text-primary transition-colors">{p.title}</h3>
+                {p.badge && <span class="badge badge-primary badge-sm">{p.badge}</span>}
+                <span class="ml-auto text-xs text-base-content/50 font-mono">{p.year}</span>
+              </div>
+              <p class="text-base-content/70 leading-relaxed mb-3">{p.desc}</p>
+              <div class="flex flex-wrap gap-1.5">
+                {p.tags.map((t) => (<span class="badge badge-outline badge-sm">{t}</span>))}
+              </div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
 </BaseLayout>

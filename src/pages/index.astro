@@ -7,70 +7,138 @@ import createSlug from "../lib/createSlug"
 const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 const last_posts = posts.slice(0, 3);
+
+const projects = [
+  {
+    emoji: "📊",
+    gradient: "from-primary/30 to-secondary/30",
+    title: "实时数仓平台",
+    year: "2024",
+    tags: ["Flink", "Kafka", "Iceberg"],
+    desc: "基于流批一体架构搭建的实时数据仓库，日处理事件 10 亿+ 条，端到端延迟 < 3s。",
+    badge: "NEW"
+  },
+  {
+    emoji: "🧪",
+    gradient: "from-secondary/30 to-accent/30",
+    title: "指标计算引擎",
+    year: "2024",
+    tags: ["Spark", "ClickHouse"],
+    desc: "支持万级指标定义与调度的自助分析平台，业务方零代码即可上线新指标。",
+  },
+  {
+    emoji: "🕸️",
+    gradient: "from-accent/30 to-primary/30",
+    title: "数据血缘系统",
+    year: "2023",
+    tags: ["Atlas", "Neo4j"],
+    desc: "端到端字段级血缘追踪，覆盖离线/实时全链路，帮助合规与影响分析场景。",
+    badge: "FOSS"
+  },
+];
 ---
 
 <BaseLayout sideBarActiveItemID="home">
-  <div class="pb-12 mt-5">
-    <div class="text-xl py-1">Hey there 👋</div>
-    <div class="text-5xl font-bold">我是 林智杰</div>
-    <div class="text-3xl py-3 font-bold">大数据工程师</div>
-    <div class="py-2">
-      <text class="text-lg">
-        构建有意思的东西，写能看懂的代码。不定期记录一些思考。
-      </text>
+  <!-- Hero -->
+  <section class="pt-6 pb-16">
+    <div class="badge badge-primary badge-outline mb-4 gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+      Open to Collaboration
     </div>
-    <div class="mt-8">
-      <a class="btn" href="mailto:your-email@example.com"> Let's connect!</a>
-      <a href="https://github.com/jolza" target="_blank" class="btn btn-outline ml-5">
+
+    <h1 class="text-5xl md:text-6xl font-black leading-tight tracking-tight">
+      你好，我是
+      <span class="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+        林智杰
+      </span>
+    </h1>
+
+    <h2 class="text-2xl md:text-3xl font-semibold text-base-content/70 mt-3">
+      大数据工程师 · Data Engineer
+    </h2>
+
+    <p class="text-lg text-base-content/80 mt-6 max-w-2xl leading-relaxed">
+      构建有意思的东西，写能看懂的代码。
+      <br class="hidden md:block" />
+      专注于数据基础设施与实时计算，不定期记录一些思考。
+    </p>
+
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a class="btn btn-primary gap-2" href="mailto:your-email@example.com">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm0 2v.511l-8 6.223-8-6.222V6h16zM4 18V9.044l7.386 5.745a.994.994 0 0 0 1.228 0L20 9.044 20.002 18H4z"/></svg>
+        Let's connect
+      </a>
+      <a href="https://github.com/jolza" target="_blank" class="btn btn-outline gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.84-2.34 4.68-4.57 4.93.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
         GitHub
       </a>
     </div>
-  </div>
+  </section>
 
-  <div>
-    <div class="text-3xl w-full font-bold mb-2">最近的项目 {"</>"}</div>
-  </div>
+  <div class="divider"></div>
 
-  <HorizontalCard
-    title="项目 1"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-    badge="NEW"
-  />
-  <div class="divider my-0"></div>
-  <HorizontalCard
-    title="项目 2"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-  />
-  <div class="divider my-0"></div>
-  <HorizontalCard
-    title="项目 3"
-    img="/post_img.webp"
-    desc="项目描述待填。这里可以写一段项目的核心目标和技术亮点。"
-    url="#"
-    badge="FOSS"
-  />
+  <!-- Projects -->
+  <section class="mt-16">
+    <div class="flex items-baseline gap-3 mb-8">
+      <h3 class="text-3xl font-bold">最近的项目</h3>
+      <span class="text-base-content/50 font-mono text-sm">// Recent Work</span>
+    </div>
 
-  <div>
-    <div class="text-3xl w-full font-bold mb-5 mt-10">最新博客</div>
-  </div>
+    <div class="grid gap-5">
+      {projects.map((p) => (
+        <a href="#" class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
+          <div class="flex flex-col md:flex-row">
+            <div class={`bg-gradient-to-br ${p.gradient} md:w-40 flex items-center justify-center p-6 text-6xl`}>
+              {p.emoji}
+            </div>
+            <div class="flex-1 p-5">
+              <div class="flex items-center gap-2 mb-2">
+                <h4 class="text-xl font-bold group-hover:text-primary transition-colors">{p.title}</h4>
+                {p.badge && <span class="badge badge-primary badge-sm">{p.badge}</span>}
+                <span class="ml-auto text-xs text-base-content/50 font-mono">{p.year}</span>
+              </div>
+              <p class="text-base-content/70 leading-relaxed mb-3">{p.desc}</p>
+              <div class="flex flex-wrap gap-1.5">
+                {p.tags.map((t) => (
+                  <span class="badge badge-outline badge-sm">{t}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
 
-  {
-    last_posts.map((post) => (
-      <>
-        <HorizontalCard
-          title={post.data.title}
-          img={post.data.heroImage}
-          desc={post.data.description}
-          url={"/blog/" + createSlug(post.data.title, post.slug)}
-          target="_self"
-          badge={post.data.badge}
-        />
-        <div class="divider my-0" />
-      </>
-    ))
-  }
+    <div class="mt-6 text-right">
+      <a href="/projects" class="link link-primary font-medium">查看所有项目 →</a>
+    </div>
+  </section>
+
+  <!-- Blog -->
+  <section class="mt-20">
+    <div class="flex items-baseline gap-3 mb-8">
+      <h3 class="text-3xl font-bold">最新博客</h3>
+      <span class="text-base-content/50 font-mono text-sm">// Latest Posts</span>
+    </div>
+
+    {
+      last_posts.map((post) => (
+        <>
+          <HorizontalCard
+            title={post.data.title}
+            img={post.data.heroImage}
+            desc={post.data.description}
+            url={"/blog/" + createSlug(post.data.title, post.slug)}
+            target="_self"
+            badge={post.data.badge}
+          />
+          <div class="divider my-0" />
+        </>
+      ))
+    }
+
+    <div class="mt-6 text-right">
+      <a href="/blog" class="link link-primary font-medium">查看所有博客 →</a>
+    </div>
+  </section>
 </BaseLayout>
