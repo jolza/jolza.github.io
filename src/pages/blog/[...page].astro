@@ -13,16 +13,21 @@ export async function getStaticPaths({ paginate }) {
 const { page } = Astro.props;
 ---
 
-<BaseLayout title="Blog" sideBarActiveItemID="blog">
-  <div class="mb-5">
-    <div class="text-3xl w-full font-bold">Blog</div>
-  </div>
+<BaseLayout title="博客" sideBarActiveItemID="blog">
+  <section class="pt-6 pb-4">
+    <div class="badge badge-primary badge-outline mb-4">Blog</div>
+    <h1 class="text-4xl md:text-5xl font-black tracking-tight">博客</h1>
+    <p class="text-base-content/70 mt-3 max-w-2xl">
+      工作里的思考、踩过的坑、以及一些技术笔记。
+    </p>
+  </section>
 
+  <div class="mt-8">
   {
     page.data.length === 0 ? (
-      <div class="bg-base-200 border-l-4 border-secondary w-full p-4 min-w-full">
-        <p class="font-bold">Sorry!</p>
-        <p>There are no blog posts to show at the moment. Check back later!</p>
+      <div class="bg-base-200 border-l-4 border-primary w-full p-4 min-w-full rounded-r">
+        <p class="font-bold">还没有文章</p>
+        <p class="text-base-content/70">正在酝酿中，稍后回来看看吧。</p>
       </div>
     ) : (
       <ul>
@@ -43,6 +48,7 @@ const { page } = Astro.props;
       </ul>
     )
   }
+  </div>
 
   <div class="flex justify-between">
     {
@@ -58,7 +64,7 @@ const { page } = Astro.props;
           >
             <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z" />
           </svg>{" "}
-          Recent posts
+          最新文章
         </a>
       ) : (
         <div />
@@ -67,7 +73,7 @@ const { page } = Astro.props;
     {
       page.url.next ? (
         <a href={page.url.next} class="btn btn-ghost my-10 mx-5">
-          Older Posts{" "}
+          更早文章{" "}
           <svg
             class="h-6 w-6 fill-current md:h-8 md:w-8"
             xmlns="http://www.w3.org/2000/svg"
