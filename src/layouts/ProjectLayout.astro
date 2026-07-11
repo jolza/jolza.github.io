@@ -1,0 +1,78 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import { type ProjectSchema } from "../content/config";
+
+export interface Props extends ProjectSchema {}
+
+const {
+  title,
+  description,
+  emoji,
+  gradient,
+  year,
+  status,
+  tags = [],
+  badge,
+  repo,
+  demo,
+} = Astro.props;
+
+const statusLabel: Record<string, string> = {
+  "in-progress": "进行中",
+  "completed": "已完成",
+  "archived": "归档",
+};
+
+const statusColor: Record<string, string> = {
+  "in-progress": "badge-primary",
+  "completed": "badge-ghost",
+  "archived": "badge-outline",
+};
+---
+
+<BaseLayout title={title} description={description} ogType="article">
+  <main class="md:flex md:justify-center">
+    <article class="prose prose-lg max-w-[750px] prose-img:mx-auto">
+      <a href="/projects/" class="not-prose text-sm text-base-content/60 hover:text-primary transition-colors inline-flex items-center gap-1 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/></svg>
+        返回项目集
+      </a>
+
+      <div class={`not-prose mb-6 rounded-2xl bg-gradient-to-br ${gradient} p-10 flex items-center justify-center text-8xl`}>
+        {emoji}
+      </div>
+
+      <h1 class="title mt-2 mb-3 text-4xl font-bold leading-tight">{title}</h1>
+      <p class="text-lg text-base-content/70 mt-0">{description}</p>
+
+      <div class="flex flex-wrap items-center gap-2 not-prose mb-4">
+        <span class={`badge badge-sm ${statusColor[status]}`}>{statusLabel[status]}</span>
+        <span class="text-sm text-base-content/60 font-mono">{year}</span>
+        {badge && <span class="badge badge-primary badge-sm">{badge}</span>}
+        {tags && tags.map((tag) => (
+          <span class="badge badge-outline badge-sm">{tag}</span>
+        ))}
+      </div>
+
+      {(repo || demo) && (
+        <div class="flex flex-wrap gap-3 not-prose mb-6">
+          {demo && (
+            <a href={demo} target="_blank" rel="noopener" class="btn btn-primary btn-sm gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6v2H5v11h11v-5h2v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6zm11-3v8h-2V6.413l-7.793 7.794-1.414-1.414L17.585 5H13V3h8z"/></svg>
+              在线演示
+            </a>
+          )}
+          {repo && (
+            <a href={repo} target="_blank" rel="noopener" class="btn btn-outline btn-sm gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.84-2.34 4.68-4.57 4.93.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+              GitHub
+            </a>
+          )}
+        </div>
+      )}
+
+      <div class="divider my-6"></div>
+      <slot />
+    </article>
+  </main>
+</BaseLayout>

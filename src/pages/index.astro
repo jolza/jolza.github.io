@@ -8,34 +8,13 @@ const posts = (await getCollection("blog")).sort((a, b) => b.data.pubDate.valueO
 
 const last_posts = posts.slice(0, 3);
 
-const projects = [
-  {
-    emoji: "📊",
-    gradient: "from-primary/30 to-secondary/30",
-    title: "实时数仓平台",
-    year: "2024",
-    tags: ["Flink", "Kafka", "Iceberg"],
-    desc: "基于流批一体架构搭建的实时数据仓库，日处理事件 10 亿+ 条，端到端延迟 < 3s。",
-    badge: "NEW"
-  },
-  {
-    emoji: "🧪",
-    gradient: "from-secondary/30 to-accent/30",
-    title: "指标计算引擎",
-    year: "2024",
-    tags: ["Spark", "ClickHouse"],
-    desc: "支持万级指标定义与调度的自助分析平台，业务方零代码即可上线新指标。",
-  },
-  {
-    emoji: "🕸️",
-    gradient: "from-accent/30 to-primary/30",
-    title: "数据血缘系统",
-    year: "2023",
-    tags: ["Atlas", "Neo4j"],
-    desc: "端到端字段级血缘追踪，覆盖离线/实时全链路，帮助合规与影响分析场景。",
-    badge: "FOSS"
-  },
-];
+const allProjects = (await getCollection("projects")).sort((a, b) => {
+  const oa = a.data.order ?? 0;
+  const ob = b.data.order ?? 0;
+  if (oa !== ob) return ob - oa;
+  return Number(b.data.year) - Number(a.data.year);
+});
+const topProjects = allProjects.slice(0, 3);
 ---
 
 <BaseLayout sideBarActiveItemID="home">
@@ -85,24 +64,29 @@ const projects = [
     </div>
 
     <div class="grid gap-5">
-      {projects.map((p) => (
-        <a href="#" class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden">
+      {topProjects.map((p) => (
+        <a
+          href={"/projects/" + createSlug(p.data.title, p.slug) + "/"}
+          class="group block rounded-2xl border border-base-300 bg-base-100 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all overflow-hidden"
+        >
           <div class="flex flex-col md:flex-row">
-            <div class={`bg-gradient-to-br ${p.gradient} md:w-40 flex items-center justify-center p-6 text-6xl`}>
-              {p.emoji}
+            <div class={`bg-gradient-to-br ${p.data.gradient} md:w-40 flex items-center justify-center p-6 text-6xl`}>
+              {p.data.emoji}
             </div>
             <div class="flex-1 p-5">
               <div class="flex items-center gap-2 mb-2">
-                <h4 class="text-xl font-bold group-hover:text-primary transition-colors">{p.title}</h4>
-                {p.badge && <span class="badge badge-primary badge-sm">{p.badge}</span>}
-                <span class="ml-auto text-xs text-base-content/50 font-mono">{p.year}</span>
+                <h4 class="text-xl font-bold group-hover:text-primary transition-colors">{p.data.title}</h4>
+                {p.data.badge && <span class="badge badge-primary badge-sm">{p.data.badge}</span>}
+                <span class="ml-auto text-xs text-base-content/50 font-mono">{p.data.year}</span>
               </div>
-              <p class="text-base-content/70 leading-relaxed mb-3">{p.desc}</p>
-              <div class="flex flex-wrap gap-1.5">
-                {p.tags.map((t) => (
-                  <span class="badge badge-outline badge-sm">{t}</span>
-                ))}
-              </div>
+              <p class="text-base-content/70 leading-relaxed mb-3">{p.data.description}</p>
+              {p.data.tags && (
+                <div class="flex flex-wrap gap-1.5">
+                  {p.data.tags.map((t) => (
+                    <span class="badge badge-outline badge-sm">{t}</span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </a>
