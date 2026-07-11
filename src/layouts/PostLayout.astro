@@ -58,19 +58,29 @@ import { Image } from "astro:assets";
     (function () {
       const NAMESPACE = "jolza-github-io";
 
+      // Short stable hash from path (Abacus limits keys to 3-64 chars).
+      // DJB2-like: fast, deterministic, base36 -> ~7 chars for 32-bit result.
+      function hashKey(path) {
+        let h = 5381;
+        for (let i = 0; i < path.length; i++) {
+          h = ((h << 5) + h + path.charCodeAt(i)) | 0;
+        }
+        return "p_" + (h >>> 0).toString(36); // "p_" prefix keeps it >= 3 chars even for h=0
+      }
+
       async function loadCount() {
         const el = document.querySelector("[data-view-counter]");
         const valueEl = document.querySelector("[data-view-value]");
         if (!el || !valueEl) return;
 
-        // Sanitize path to a stable key
-        const key = (location.pathname || "/").replace(/^\/+|\/+$/g, "").replace(/[^\w-]/g, "_") || "index";
+        const path = location.pathname || "/";
+        const key = hashKey(path);
 
-        // Anti double-count per session
         const sessionKey = "viewed:" + key;
         const alreadyViewed = sessionStorage.getItem(sessionKey);
         const endpoint = alreadyViewed ? "get" : "hit";
 
+        valueEl.textContent = "…";
         try {
           const res = await fetch(`https://abacus.jasoncameron.dev/${endpoint}/${NAMESPACE}/${key}`, { cache: "no-store" });
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -82,8 +92,10 @@ import { Image } from "astro:assets";
         }
       }
 
-      loadCount();
-      document.addEventListener("astro:after-swap", loadCount);
+      if (!window.__viewCounterInit) {
+        window.__viewCounterInit = true;
+        document.addEventListener("astro:page-load", loadCount);
+      }
     })();
   </script>
 </BaseLayout>

@@ -22,7 +22,6 @@ const today = new Date();
       const v = document.querySelector("[data-site-value]");
       if (!el || !v) return;
 
-      // Anti double-count per session (once per browser session across pages)
       const alreadyCounted = sessionStorage.getItem("site-counted");
       const endpoint = alreadyCounted ? "get" : "hit";
 
@@ -35,7 +34,9 @@ const today = new Date();
         sessionStorage.setItem("site-counted", "1");
       } catch (e) { /* silent */ }
     }
-    loadSite();
-    document.addEventListener("astro:after-swap", loadSite);
+    if (!window.__siteCounterInit) {
+      window.__siteCounterInit = true;
+      document.addEventListener("astro:page-load", loadSite);
+    }
   })();
 </script>
