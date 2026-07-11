@@ -10,26 +10,32 @@ const today = new Date();
     Built with <a href="https://astro.build" target="_blank" class="font-medium hover:text-primary transition-colors">Astro</a>
     &nbsp;·&nbsp; Hosted on <a href="https://pages.github.com/" target="_blank" class="font-medium hover:text-primary transition-colors">GitHub Pages</a>
   </div>
-  <div class="text-xs opacity-75">
-    <span id="busuanzi_container_site_pv" style="display:none">总访问 <span id="busuanzi_value_site_pv">-</span> 次</span>
-    <span id="busuanzi_container_site_uv" style="display:none">&nbsp;·&nbsp; <span id="busuanzi_value_site_uv">-</span> 人到访</span>
+  <div class="text-xs opacity-75" data-site-counter style="display:none">
+    总访问 <span data-site-value>-</span> 次
   </div>
 </footer>
 <script is:inline>
   (function () {
-    const targets = [
-      ["busuanzi_container_site_pv", "busuanzi_value_site_pv"],
-      ["busuanzi_container_site_uv", "busuanzi_value_site_uv"],
-    ];
-    let tries = 0;
-    const timer = setInterval(() => {
-      tries++;
-      targets.forEach(([cid, vid]) => {
-        const c = document.getElementById(cid);
-        const v = document.getElementById(vid);
-        if (c && v && v.textContent && v.textContent !== "-") c.style.display = "";
-      });
-      if (tries > 15) clearInterval(timer);
-    }, 400);
+    const NAMESPACE = "jolza-github-io";
+    async function loadSite() {
+      const el = document.querySelector("[data-site-counter]");
+      const v = document.querySelector("[data-site-value]");
+      if (!el || !v) return;
+
+      // Anti double-count per session (once per browser session across pages)
+      const alreadyCounted = sessionStorage.getItem("site-counted");
+      const endpoint = alreadyCounted ? "get" : "hit";
+
+      try {
+        const res = await fetch(`https://abacus.jasoncameron.dev/${endpoint}/${NAMESPACE}/__site__`, { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        v.textContent = data.value.toLocaleString();
+        el.style.display = "";
+        sessionStorage.setItem("site-counted", "1");
+      } catch (e) { /* silent */ }
+    }
+    loadSite();
+    document.addEventListener("astro:after-swap", loadSite);
   })();
 </script>

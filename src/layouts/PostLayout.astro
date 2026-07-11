@@ -25,13 +25,9 @@ import { Image } from "astro:assets";
             <time datetime={pubDate.toISOString()}>{displayDate}</time>
           </span>
         )}
-        <span
-          id="busuanzi_container_page_pv"
-          class="inline-flex items-center gap-1.5"
-          style="display:none"
-        >
+        <span class="inline-flex items-center gap-1.5" data-view-counter>
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c5.392 0 9.878 3.88 10.819 9-.94 5.12-5.427 9-10.819 9-5.392 0-9.878-3.88-10.819-9C2.121 6.88 6.608 3 12 3zm0 16a9.005 9.005 0 0 0 8.777-7 9.005 9.005 0 0 0-17.554 0A9.005 9.005 0 0 0 12 19zm0-2.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9zm0-2a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
-          <span id="busuanzi_value_page_pv">-</span>
+          <span data-view-value>…</span>
           <span>次阅读</span>
         </span>
         {badge && <span class="badge badge-primary badge-sm">{badge}</span>}
@@ -59,25 +55,35 @@ import { Image } from "astro:assets";
   </main>
 
   <script is:inline>
-    // Reveal PV counter once busuanzi has populated it (or gracefully after timeout)
     (function () {
-      const container = document.getElementById("busuanzi_container_page_pv");
-      const value = document.getElementById("busuanzi_value_page_pv");
-      if (!container || !value) return;
-      const reveal = () => { container.style.display = ""; };
-      // Poll for a few seconds; busuanzi replaces content async
-      let tries = 0;
-      const timer = setInterval(() => {
-        tries++;
-        if (value.textContent && value.textContent !== "-") {
-          reveal();
-          clearInterval(timer);
-        } else if (tries > 15) {
-          // Fallback: even if fetch failed, show placeholder anyway to avoid hidden UI
-          reveal();
-          clearInterval(timer);
+      const NAMESPACE = "jolza-github-io";
+
+      async function loadCount() {
+        const el = document.querySelector("[data-view-counter]");
+        const valueEl = document.querySelector("[data-view-value]");
+        if (!el || !valueEl) return;
+
+        // Sanitize path to a stable key
+        const key = (location.pathname || "/").replace(/^\/+|\/+$/g, "").replace(/[^\w-]/g, "_") || "index";
+
+        // Anti double-count per session
+        const sessionKey = "viewed:" + key;
+        const alreadyViewed = sessionStorage.getItem(sessionKey);
+        const endpoint = alreadyViewed ? "get" : "hit";
+
+        try {
+          const res = await fetch(`https://abacus.jasoncameron.dev/${endpoint}/${NAMESPACE}/${key}`, { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          valueEl.textContent = data.value.toLocaleString();
+          sessionStorage.setItem(sessionKey, "1");
+        } catch (e) {
+          valueEl.textContent = "-";
         }
-      }, 400);
+      }
+
+      loadCount();
+      document.addEventListener("astro:after-swap", loadCount);
     })();
   </script>
 </BaseLayout>
