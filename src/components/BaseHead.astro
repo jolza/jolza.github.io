@@ -2,6 +2,7 @@
 // Import the global.css file here so that it is included on
 // all pages through the use of the <BaseHead /> component.
 import '../styles/global.css';
+import { BAIDU_ANALYTICS_ID } from '../config';
 
 export interface Props {
 	title: string;
@@ -37,3 +38,15 @@ const { title, description, image = '/social_img.webp', ogType = 'website' } = A
 <meta property="twitter:title" content={title} />
 <meta property="twitter:description" content={description} />
 <meta property="twitter:image" content={new URL(image, Astro.url)} />
+
+{BAIDU_ANALYTICS_ID && (
+	<script is:inline define:vars={{ id: BAIDU_ANALYTICS_ID }}>
+		var _hmt = _hmt || [];
+		(function () {
+			var hm = document.createElement("script");
+			hm.src = "https://hm.baidu.com/hm.js?" + id;
+			var s = document.getElementsByTagName("script")[0];
+			s.parentNode.insertBefore(hm, s);
+		})();
+	</script>
+)}
